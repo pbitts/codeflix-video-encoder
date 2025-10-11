@@ -9,7 +9,7 @@ import (
 
 type JobRepository interface {
 	Insert(job *domain.Job) (*domain.Job, error)
-	Finc(id string) (*domain.Job, error)
+	Find(id string) (*domain.Job, error)
 	Update(job *domain.Job) (*domain.Job, error)
 }
 
