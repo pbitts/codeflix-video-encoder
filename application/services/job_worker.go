@@ -1,10 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"os"
 	"time"
 
-	"github.com/go-jose/go-jose/v4/json"
 	"github.com/pbitts/codeflix-video-encoder/domain"
 	"github.com/pbitts/codeflix-video-encoder/framework/utils"
 	uuid "github.com/satori/go.uuid"

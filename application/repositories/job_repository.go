@@ -26,6 +26,7 @@ func (repo JobRepositoryDb) Insert(job *domain.Job) (*domain.Job, error) {
 	}
 
 	return job, nil
+
 }
 
 func (repo JobRepositoryDb) Find(id string) (*domain.Job, error) {
@@ -41,7 +42,6 @@ func (repo JobRepositoryDb) Find(id string) (*domain.Job, error) {
 }
 
 func (repo JobRepositoryDb) Update(job *domain.Job) (*domain.Job, error) {
-
 	err := repo.Db.Save(&job).Error
 
 	if err != nil {

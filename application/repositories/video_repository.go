@@ -34,6 +34,7 @@ func (repo VideoRepositoryDb) Insert(video *domain.Video) (*domain.Video, error)
 	}
 
 	return video, nil
+
 }
 
 func (repo VideoRepositoryDb) Find(id string) (*domain.Video, error) {
@@ -46,4 +47,5 @@ func (repo VideoRepositoryDb) Find(id string) (*domain.Video, error) {
 	}
 
 	return &video, nil
+
 }
