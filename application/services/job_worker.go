@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/pbitts/codeflix-video-encoder/domain"
@@ -17,7 +18,14 @@ type JobWorkerResult struct {
 	Error   error
 }
 
+var Mutex = &sync.Mutex{}
+
 func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResult, jobService JobService, job domain.Job, workerID int) {
+
+	//{
+	//	"resource_id":"id do video da pessoa que enviou para nossa fila",
+	//	"file_path": "convite.mp4"
+	//}
 
 	for message := range messageChannel {
 
@@ -28,8 +36,10 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 			continue
 		}
 
+		Mutex.Lock()
 		err = json.Unmarshal(message.Body, &jobService.VideoService.Video)
 		jobService.VideoService.Video.ID = uuid.NewV4().String()
+		Mutex.Unlock()
 
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
@@ -42,7 +52,9 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 			continue
 		}
 
+		Mutex.Lock()
 		err = jobService.VideoService.InsertVideo()
+		Mutex.Unlock()
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
@@ -54,7 +66,9 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 		job.Status = "STARTING"
 		job.CreatedAt = time.Now()
 
+		Mutex.Lock()
 		_, err = jobService.JobRepository.Insert(&job)
+		Mutex.Unlock()
 
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
@@ -63,6 +77,7 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 
 		jobService.Job = &job
 		err = jobService.Start()
+
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
@@ -73,7 +88,6 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 	}
 
 }
-
 func returnJobResult(job domain.Job, message amqp.Delivery, err error) JobWorkerResult {
 	result := JobWorkerResult{
 		Job:     job,
